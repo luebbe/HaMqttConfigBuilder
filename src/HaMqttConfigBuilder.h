@@ -10,22 +10,30 @@ private:
     String key;
     String str;
     double num;
+    boolean asSource;
   };
   std::vector<Elem> elements;
 
 public:
-  // Add an element to the config payload if it's not empty
+  // Add an element to the config payload if it's not empty or if it is required
   HaMqttConfigBuilder &add(const String &key, const String &str, bool isRequired = true)
   {
     if (isRequired || (str.length() > 0))
     {
-      elements.push_back({key, str, 0});
+      elements.push_back({key, str, 0, false});
     }
     return *this;
   }
+
   HaMqttConfigBuilder &add(const String &key, const double num)
   {
-    elements.push_back({key, "", num});
+    elements.push_back({key, "", num, false});
+    return *this;
+  }
+
+  HaMqttConfigBuilder &addSource(const String &key, const String &str)
+  {
+    elements.push_back({key, str, 0, true});
     return *this;
   }
 
@@ -43,15 +51,13 @@ public:
       str.concat(elem.key);
       str.concat("\":");
 
-      if (elem.str.startsWith("{") || elem.str.startsWith("["))
+      if (elem.str.length() > 0)
       {
+        if (!elem.asSource)
+          str.concat('"');
         str.concat(elem.str);
-      }
-      else if (elem.str.length() > 0)
-      {
-        str.concat('"');
-        str.concat(elem.str);
-        str.concat('"');
+        if (!elem.asSource)
+          str.concat('"');
       }
       else
       {

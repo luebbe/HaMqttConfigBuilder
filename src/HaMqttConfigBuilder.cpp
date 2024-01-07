@@ -1,3 +1,7 @@
+// Config payload generation for Home Assistant MQTT discovery
+// Initial version by Patrick Lapointe <https://github.com/plapointe6>
+// Upgrades by Lübbe Onken <https://github.com/luebbe>
+
 #include "HaMqttConfigBuilder.h"
 
 String HaMqttConfigBuilder::generatePayload()
@@ -109,7 +113,7 @@ void DeviceConfigBuilder::sendConfig(const char *confType, const char *id, const
 {
     const uint8_t MAX_MQTT_LENGTH = 255;
     char mqttTopic[MAX_MQTT_LENGTH];
-    snprintf(mqttTopic, MAX_MQTT_LENGTH, "%s/%s/%s/%s/config", _discoveryTopic.c_str(), confType, _deviceTopic.c_str(), id);
+    snprintf(mqttTopic, MAX_MQTT_LENGTH, "%s/%s/%s_%s_%s/config", _discoveryTopic.c_str(), confType, _deviceTopic.c_str(), _deviceId.c_str(), id);
 
     if (_sendCallback)
     {

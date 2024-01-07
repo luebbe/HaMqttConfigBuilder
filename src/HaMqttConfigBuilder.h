@@ -1,11 +1,13 @@
 #pragma once
 
+// Config payload generation for Home Assistant MQTT discovery
+// Initial version by Patrick Lapointe <https://github.com/plapointe6>
+// Upgrades by Lübbe Onken <https://github.com/luebbe>
+
 #include "Arduino.h"
 
-// Home Assistant integration
-
 #define cDiscoveryTopic "homeassistant"
-#define cDeviceTopic  "device"
+#define cDeviceTopic "device"
 #define cAvailabilityTopic "$state"
 #define cPlAvailable "ready"
 #define cPlNotAvailable "lost"
@@ -85,33 +87,33 @@ public:
   String createSelect(const char *name, const char *id, const char *stateTopic, const char *icon, const char *options);
   String createSensor(const char *name, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass);
 
-  DeviceConfigBuilder setDeviceTopic(char *deviceTopic)
+  DeviceConfigBuilder &setDeviceTopic(const char *value)
   {
-    _deviceTopic = deviceTopic;
+    _deviceTopic = value;
     return *this;
   }
 
-  DeviceConfigBuilder setAvailabilityTopic(const char *availabilityTopic)
+  DeviceConfigBuilder &setAvailabilityTopic(const char *value)
   {
-    _availabilityTopic = availabilityTopic;
+    _availabilityTopic = value;
     return *this;
   }
 
-  DeviceConfigBuilder setPayloadAvailable(const char *payloadAvailable)
+  DeviceConfigBuilder &setPayloadAvailable(const char *value)
   {
-    _payloadAvailable = payloadAvailable;
+    _payloadAvailable = value;
     return *this;
   }
 
-  DeviceConfigBuilder setPayloadNotAvailable(const char *payloadNotAvailable)
+  DeviceConfigBuilder &setPayloadNotAvailable(const char *value)
   {
-    _payloadNotAvailable = payloadNotAvailable;
+    _payloadNotAvailable = value;
     return *this;
   }
 
-  DeviceConfigBuilder setSendCallback(SendCallback sendCallback)
+  DeviceConfigBuilder &setSendCallback(SendCallback value)
   {
-    _sendCallback = sendCallback;
+    _sendCallback = value;
     return *this;
   }
 };

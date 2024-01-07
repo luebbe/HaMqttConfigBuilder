@@ -71,8 +71,8 @@ private:
 
   SendCallback _sendCallback = NULL;
 
-  HaMqttConfigBuilder &addDefaults(const char *name, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass);
-  void sendConfig(const char *confType, const char *name, const String &config);
+  HaMqttConfigBuilder &addDefaults(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass);
+  void sendConfig(const char *confType, const char *id, const String &config);
 
 public:
   DeviceConfigBuilder(

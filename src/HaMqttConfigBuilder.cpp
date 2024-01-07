@@ -54,14 +54,14 @@ DeviceConfigBuilder::DeviceConfigBuilder(
             .generatePayload();
 }
 
-HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(const char *name, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass)
+HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass)
 {
     String uniq_id = id;
     uniq_id.toLowerCase();
     uniq_id.replace(" ", "_");
 
     clear();
-    return add("name", name)
+    return add("name", friendlyName)
         .add("uniq_id", String(_deviceId) + String("_") + uniq_id)
         .add("dev_cla", deviceClass, false)
         .add("ic", icon, false)
@@ -77,7 +77,7 @@ HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(const char *name, const ch
 String DeviceConfigBuilder::createLight(const char *friendlyName, const char *id, const char *stateTopic, const char *icon)
 {
     String config =
-        addDefaults(friendlyName, id, stateTopic, "", icon, "")
+        addDefaults(friendlyName, id, stateTopic, icon, "", "")
             .add("cmd_t", String("~/") + stateTopic + String("/set"))
             .add("pl_off", "Off")
             .add("pl_on", "On")
@@ -90,7 +90,7 @@ String DeviceConfigBuilder::createLight(const char *friendlyName, const char *id
 String DeviceConfigBuilder::createSelect(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *options)
 {
     String config =
-        addDefaults(friendlyName, id, stateTopic, "", icon, "")
+        addDefaults(friendlyName, id, stateTopic, icon, "", "")
             .addSource("options", options)
             .add("cmd_t", String("~/") + stateTopic + String("/set"))
             .generatePayload();
@@ -102,7 +102,7 @@ String DeviceConfigBuilder::createSelect(const char *friendlyName, const char *i
 String DeviceConfigBuilder::createSensor(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass)
 {
     String config =
-        addDefaults(friendlyName, id, stateTopic, unit, icon, deviceClass)
+        addDefaults(friendlyName, id, stateTopic, icon, unit, deviceClass)
             .generatePayload();
 
     sendConfig("sensor", id, config);
@@ -113,7 +113,7 @@ void DeviceConfigBuilder::sendConfig(const char *confType, const char *id, const
 {
     const uint8_t MAX_MQTT_LENGTH = 255;
     char mqttTopic[MAX_MQTT_LENGTH];
-    snprintf(mqttTopic, MAX_MQTT_LENGTH, "%s/%s/%s_%s_%s/config", _discoveryTopic.c_str(), confType, _deviceTopic.c_str(), _deviceId.c_str(), id);
+    snprintf(mqttTopic, MAX_MQTT_LENGTH, "%s/%s/%s_%s/%s/config", _discoveryTopic.c_str(), confType, _deviceTopic.c_str(), _deviceId.c_str(), id);
 
     if (_sendCallback)
     {

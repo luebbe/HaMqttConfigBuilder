@@ -86,6 +86,7 @@ public:
   String createLight(const char *name, const char *id, const char *stateTopic, const char *icon);
   String createSelect(const char *name, const char *id, const char *stateTopic, const char *icon, const char *options);
   String createSensor(const char *name, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass);
+  String createSwitch(const char *name, const char *id, const char *stateTopic, const char *icon);
 
   DeviceConfigBuilder &setDeviceTopic(const char *value)
   {

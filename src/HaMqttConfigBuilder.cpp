@@ -109,6 +109,19 @@ String DeviceConfigBuilder::createSensor(const char *friendlyName, const char *i
     return config;
 }
 
+String DeviceConfigBuilder::createSwitch(const char *friendlyName, const char *id, const char *stateTopic, const char *icon)
+{
+    String config =
+        addDefaults(friendlyName, id, stateTopic, icon, "", "")
+            .add("cmd_t", String("~/") + stateTopic + String("/set"))
+            .add("pl_off", "Off")
+            .add("pl_on", "On")
+            .generatePayload();
+
+    sendConfig("switch", id, config);
+    return config;
+}
+
 void DeviceConfigBuilder::sendConfig(const char *confType, const char *id, const String &config)
 {
     const uint8_t MAX_MQTT_LENGTH = 255;

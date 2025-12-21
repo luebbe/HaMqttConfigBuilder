@@ -125,7 +125,7 @@ String DeviceConfigBuilder::createSwitch(const char *friendlyName, const char *i
 void DeviceConfigBuilder::sendConfig(const char *confType, const char *id, const String &config)
 {
     const uint8_t MAX_MQTT_LENGTH = 255;
-    char mqttTopic[MAX_MQTT_LENGTH + 1];
+    char mqttTopic[MAX_MQTT_LENGTH];
     snprintf(mqttTopic, MAX_MQTT_LENGTH, "%s/%s/%s/%s/config", _discoveryTopic.c_str(), confType, _deviceTopic.c_str(), id);
 
     if (_sendCallback)

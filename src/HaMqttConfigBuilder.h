@@ -12,7 +12,7 @@
 #define cPlAvailable "ready"
 #define cPlNotAvailable "lost"
 
-typedef std::function<void(const char *topic, const char *payload)> SendCallback;
+typedef std::function<void(String topic, String payload)> SendCallback;
 
 // A helper class to generate a json Key/Value config payload for Home Assistant
 class HaMqttConfigBuilder
@@ -71,42 +71,42 @@ private:
 
   SendCallback _sendCallback = NULL;
 
-  HaMqttConfigBuilder &addDefaults(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass);
-  void sendConfig(const char *confType, const char *id, const String &config);
+  HaMqttConfigBuilder &addDefaults(String friendlyName, String id, String stateTopic, String icon, String unit, String deviceClass);
+  void sendConfig(String confType, String id, const String &config);
 
 public:
   DeviceConfigBuilder(
-      const char *uniqueId,
-      const char *fwName,
-      const char *fwVersion,
-      const char *fwManufacturer,
-      const char *fwModel);
+      String uniqueId,
+      String fwName,
+      String fwVersion,
+      String fwManufacturer,
+      String fwModel);
 
   // Create different types of home assistant auto configurations
-  String createLight(const char *name, const char *id, const char *stateTopic, const char *icon);
-  String createSelect(const char *name, const char *id, const char *stateTopic, const char *icon, const char *options);
-  String createSensor(const char *name, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass);
-  String createSwitch(const char *name, const char *id, const char *stateTopic, const char *icon);
+  String createLight(String name, String id, String stateTopic, String icon);
+  String createSelect(String name, String id, String stateTopic, String icon, String options);
+  String createSensor(String name, String id, String stateTopic, String icon, String unit, String deviceClass);
+  String createSwitch(String name, String id, String stateTopic, String icon);
 
-  DeviceConfigBuilder &setDeviceTopic(const char *value)
+  DeviceConfigBuilder &setDeviceTopic(String value)
   {
     _deviceTopic = value;
     return *this;
   }
 
-  DeviceConfigBuilder &setAvailabilityTopic(const char *value)
+  DeviceConfigBuilder &setAvailabilityTopic(String value)
   {
     _availabilityTopic = value;
     return *this;
   }
 
-  DeviceConfigBuilder &setPayloadAvailable(const char *value)
+  DeviceConfigBuilder &setPayloadAvailable(String value)
   {
     _payloadAvailable = value;
     return *this;
   }
 
-  DeviceConfigBuilder &setPayloadNotAvailable(const char *value)
+  DeviceConfigBuilder &setPayloadNotAvailable(String value)
   {
     _payloadNotAvailable = value;
     return *this;

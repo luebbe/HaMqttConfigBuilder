@@ -38,11 +38,11 @@ String HaMqttConfigBuilder::generatePayload()
 }
 
 DeviceConfigBuilder::DeviceConfigBuilder(
-    const char *uniqueId,
-    const char *fwName,
-    const char *fwVersion,
-    const char *fwManufacturer,
-    const char *fwModel) : _uniqueId(uniqueId)
+    String uniqueId,
+    String fwName,
+    String fwVersion,
+    String fwManufacturer,
+    String fwModel) : _uniqueId(uniqueId)
 {
     _deviceId = _uniqueId.substring(6); // Copy the second half of the MAC address to use it as the short ID
     _deviceInfo =
@@ -54,7 +54,7 @@ DeviceConfigBuilder::DeviceConfigBuilder(
             .generatePayload();
 }
 
-HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass)
+HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(String friendlyName, String id, String stateTopic, String icon, String unit, String deviceClass)
 {
     String uniq_id = id;
     uniq_id.toLowerCase();
@@ -62,23 +62,23 @@ HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(const char *friendlyName, 
 
     clear();
     return add("name", friendlyName)
-        .add("uniq_id", String(_deviceId) + String("_") + uniq_id)
+        .add("uniq_id", _deviceId + "_" + uniq_id)
         .add("dev_cla", deviceClass, false)
         .add("ic", icon, false)
         .add("unit_of_meas", unit, false)
         .addSource("dev", _deviceInfo)
-        .add("~", _deviceTopic)
-        .add("avty_t", String("~/") + _availabilityTopic)
+        .add("~", _deviceTopic + "/" + _deviceId)
+        .add("avty_t", "~/" + _availabilityTopic)
         .add("pl_avail", _payloadAvailable)
         .add("pl_not_avail", _payloadNotAvailable)
-        .add("stat_t", String("~/") + stateTopic);
+        .add("stat_t", "~/" + stateTopic);
 }
 
-String DeviceConfigBuilder::createLight(const char *friendlyName, const char *id, const char *stateTopic, const char *icon)
+String DeviceConfigBuilder::createLight(String friendlyName, String id, String stateTopic, String icon)
 {
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, "", "")
-            .add("cmd_t", String("~/") + stateTopic + String("/set"))
+            .add("cmd_t", "~/" + stateTopic + "/set")
             .add("pl_off", "Off")
             .add("pl_on", "On")
             .generatePayload();
@@ -87,19 +87,19 @@ String DeviceConfigBuilder::createLight(const char *friendlyName, const char *id
     return config;
 }
 
-String DeviceConfigBuilder::createSelect(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *options)
+String DeviceConfigBuilder::createSelect(String friendlyName, String id, String stateTopic, String icon, String options)
 {
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, "", "")
             .addSource("options", options)
-            .add("cmd_t", String("~/") + stateTopic + String("/set"))
+            .add("cmd_t", "~/" + stateTopic + "/set")
             .generatePayload();
 
     sendConfig("select", id, config);
     return config;
 }
 
-String DeviceConfigBuilder::createSensor(const char *friendlyName, const char *id, const char *stateTopic, const char *icon, const char *unit, const char *deviceClass)
+String DeviceConfigBuilder::createSensor(String friendlyName, String id, String stateTopic, String icon, String unit, String deviceClass)
 {
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, unit, deviceClass)
@@ -109,11 +109,11 @@ String DeviceConfigBuilder::createSensor(const char *friendlyName, const char *i
     return config;
 }
 
-String DeviceConfigBuilder::createSwitch(const char *friendlyName, const char *id, const char *stateTopic, const char *icon)
+String DeviceConfigBuilder::createSwitch(String friendlyName, String id, String stateTopic, String icon)
 {
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, "", "")
-            .add("cmd_t", String("~/") + stateTopic + String("/set"))
+            .add("cmd_t", "~/" + stateTopic + "/set")
             .add("pl_off", "Off")
             .add("pl_on", "On")
             .generatePayload();
@@ -122,14 +122,19 @@ String DeviceConfigBuilder::createSwitch(const char *friendlyName, const char *i
     return config;
 }
 
-void DeviceConfigBuilder::sendConfig(const char *confType, const char *id, const String &config)
+void DeviceConfigBuilder::sendConfig(String confType, String id, const String &config)
 {
-    const uint8_t MAX_MQTT_LENGTH = 255;
-    char mqttTopic[MAX_MQTT_LENGTH];
-    snprintf(mqttTopic, MAX_MQTT_LENGTH, "%s/%s/%s/%s/config", _discoveryTopic.c_str(), confType, _deviceTopic.c_str(), id);
+    String mqttTopic;
+
+    // HA auto discovery topic format: <discovery_prefix>/<component>/[<node_id>/]<object_id>/config
+    mqttTopic =
+        _discoveryTopic                        // <discovery_prefix>
+        + "/" + confType                       // <component>
+        + "/" + _deviceTopic + "_" + _deviceId // <node_id>
+        + "/" + id + "/config";                // <object_id>/config
 
     if (_sendCallback)
     {
-        _sendCallback(mqttTopic, config.c_str());
+        _sendCallback(mqttTopic, config);
     }
 }

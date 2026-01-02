@@ -47,7 +47,7 @@ DeviceConfigBuilder::DeviceConfigBuilder(
     _deviceId = _uniqueId.substring(6); // Copy the second half of the MAC address to use it as the short ID
     _deviceInfo =
         HaMqttConfigBuilder::add("ids", _uniqueId)
-            .add("name", fwName)
+            .add("name", fwName + " " + _deviceId)
             .add("sw", fwVersion)
             .add("mf", fwManufacturer)
             .add("mdl", fwModel)

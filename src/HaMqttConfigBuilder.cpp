@@ -73,17 +73,14 @@ HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(String friendlyName, Strin
 String DeviceConfigBuilder::createLight(String friendlyName, String id, String stateTopic, String icon, bool supportsBrightness)
 {
     addDefaults(friendlyName, id, stateTopic, icon, "", "")
-        .addStr("cmd_t", "~/" + stateTopic + "/set");
+        .addStr("cmd_t", "~/" + stateTopic + "/set")
+        .addStr("pl_off", "Off")
+        .addStr("pl_on", "On");
 
     if (supportsBrightness)
     {
-        addStr("schema", "json");
-        addBool("brightness", true);
-    }
-    else
-    {
-        addStr("pl_off", "Off");
-        addStr("pl_on", "On");
+        addStr("bri_stat_t", "~/" + stateTopic + "/brightness");
+        addStr("bri_cmd_t", "~/" + stateTopic + "/brightness/set");
     }
 
     String config = generatePayload();

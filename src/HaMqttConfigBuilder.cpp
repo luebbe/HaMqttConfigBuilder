@@ -6,34 +6,30 @@
 
 String HaMqttConfigBuilder::generatePayload()
 {
-    String payload = "{";
+    JsonDocument doc;
 
     for (Elem elem : _elements)
     {
-        payload.concat('"');
-        payload.concat(elem.key);
-        payload.concat("\":");
-
-        if (elem.str.length() > 0)
+        if (elem.isJson)
         {
-            if (!elem.asSource)
-                payload.concat('"');
-            payload.concat(elem.str);
-            if (!elem.asSource)
-                payload.concat('"');
+            JsonDocument json;
+            deserializeJson(json, elem.strVal);
+            doc[elem.key] = json.as<JsonVariant>();
         }
-        else
-        {
-            payload.concat(elem.num);
-        }
-        payload.concat(',');
+        else if (elem.isStr)
+            doc[elem.key] = elem.strVal;
+        else if (elem.isNum)
+            doc[elem.key] = elem.numVal;
+        else if (elem.isBool)
+            doc[elem.key] = elem.boolVal;
     }
 
-    if (payload.endsWith(","))
-        payload.setCharAt(payload.length() - 1, '}');
-    else
-        payload.concat('}');
-
+    String payload;
+#ifdef DEBUG
+    serializeJsonPretty(doc, payload);
+#else
+    serializeJson(doc, payload);
+#endif
     return payload;
 }
 
@@ -46,11 +42,11 @@ DeviceConfigBuilder::DeviceConfigBuilder(
 {
     _deviceId = _uniqueId.substring(6); // Copy the second half of the MAC address to use it as the short ID
     _deviceInfo =
-        HaMqttConfigBuilder::add("ids", _uniqueId)
-            .add("name", fwName + " " + _deviceId)
-            .add("sw", fwVersion)
-            .add("mf", fwManufacturer)
-            .add("mdl", fwModel)
+        HaMqttConfigBuilder::addStr("ids", _uniqueId)
+            .addStr("name", fwName + " " + _deviceId)
+            .addStr("sw", fwVersion)
+            .addStr("mf", fwManufacturer)
+            .addStr("mdl", fwModel)
             .generatePayload();
 }
 
@@ -61,27 +57,36 @@ HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(String friendlyName, Strin
     uniq_id.replace(" ", "_");
 
     clear();
-    return add("name", friendlyName)
-        .add("uniq_id", _deviceId + "_" + uniq_id)
-        .add("dev_cla", deviceClass, false)
-        .add("ic", icon, false)
-        .add("unit_of_meas", unit, false)
+    return addStr("name", friendlyName)
+        .addStr("uniq_id", _deviceId + "_" + uniq_id)
+        .addStr("dev_cla", deviceClass, false)
+        .addStr("ic", icon, false)
+        .addStr("unit_of_meas", unit, false)
         .addSource("dev", _deviceInfo)
-        .add("~", _deviceTopic + "/" + _deviceId)
-        .add("avty_t", "~/" + _availabilityTopic)
-        .add("pl_avail", _payloadAvailable)
-        .add("pl_not_avail", _payloadNotAvailable)
-        .add("stat_t", "~/" + stateTopic);
+        .addStr("~", _deviceTopic + "/" + _deviceId)
+        .addStr("avty_t", "~/" + _availabilityTopic)
+        .addStr("pl_avail", _payloadAvailable)
+        .addStr("pl_not_avail", _payloadNotAvailable)
+        .addStr("stat_t", "~/" + stateTopic);
 }
 
-String DeviceConfigBuilder::createLight(String friendlyName, String id, String stateTopic, String icon)
+String DeviceConfigBuilder::createLight(String friendlyName, String id, String stateTopic, String icon, bool supportsBrightness)
 {
-    String config =
-        addDefaults(friendlyName, id, stateTopic, icon, "", "")
-            .add("cmd_t", "~/" + stateTopic + "/set")
-            .add("pl_off", "Off")
-            .add("pl_on", "On")
-            .generatePayload();
+    addDefaults(friendlyName, id, stateTopic, icon, "", "")
+        .addStr("cmd_t", "~/" + stateTopic + "/set");
+
+    if (supportsBrightness)
+    {
+        addStr("schema", "json");
+        addBool("brightness", true);
+    }
+    else
+    {
+        addStr("pl_off", "Off");
+        addStr("pl_on", "On");
+    }
+
+    String config = generatePayload();
 
     sendConfig("light", id, config);
     return config;
@@ -92,7 +97,7 @@ String DeviceConfigBuilder::createSelect(String friendlyName, String id, String 
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, "", "")
             .addSource("options", options)
-            .add("cmd_t", "~/" + stateTopic + "/set")
+            .addStr("cmd_t", "~/" + stateTopic + "/set")
             .generatePayload();
 
     sendConfig("select", id, config);
@@ -113,9 +118,9 @@ String DeviceConfigBuilder::createSwitch(String friendlyName, String id, String 
 {
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, "", "")
-            .add("cmd_t", "~/" + stateTopic + "/set")
-            .add("pl_off", "Off")
-            .add("pl_on", "On")
+            .addStr("cmd_t", "~/" + stateTopic + "/set")
+            .addStr("pl_off", "Off")
+            .addStr("pl_on", "On")
             .generatePayload();
 
     sendConfig("switch", id, config);

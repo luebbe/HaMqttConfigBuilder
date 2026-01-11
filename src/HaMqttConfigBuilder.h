@@ -5,6 +5,7 @@
 // Upgrades by Lübbe Onken <https://github.com/luebbe>
 
 #include "Arduino.h"
+#include "ArduinoJson.h"
 
 #define cDiscoveryTopic "homeassistant"
 #define cDeviceTopic "device"
@@ -21,32 +22,42 @@ private:
   struct Elem
   {
     String key;
-    String str;
-    double num;
-    boolean asSource;
+    boolean isStr;
+    boolean isJson;
+    String strVal;
+    boolean isNum;
+    double numVal;
+    boolean isBool;
+    boolean boolVal;
   };
   std::vector<Elem> _elements;
 
 public:
   // Add an element to the config payload if it's not empty or if it is required
-  HaMqttConfigBuilder &add(const String &key, const String &str, bool isRequired = true)
+  HaMqttConfigBuilder &addStr(const String &key, const String &strVal, bool isRequired = true)
   {
-    if (isRequired || (str.length() > 0))
+    if (isRequired || (strVal.length() > 0))
     {
-      _elements.push_back({key, str, 0, false});
+      _elements.push_back({key, true, false, strVal, false, 0, false, false});
     }
     return *this;
   }
 
-  HaMqttConfigBuilder &add(const String &key, const double num)
+  HaMqttConfigBuilder &addFloat(const String &key, const double numVal)
   {
-    _elements.push_back({key, "", num, false});
+    _elements.push_back({key, false, false, "", true, numVal, false, false});
+    return *this;
+  }
+
+  HaMqttConfigBuilder &addBool(const String &key, const boolean boolVal)
+  {
+    _elements.push_back({key, false, false, "", false, 0, true, boolVal});
     return *this;
   }
 
   HaMqttConfigBuilder &addSource(const String &key, const String &str)
   {
-    _elements.push_back({key, str, 0, true});
+    _elements.push_back({key, false, true, str, false, 0, false, false});
     return *this;
   }
 
@@ -83,7 +94,7 @@ public:
       String fwModel);
 
   // Create different types of home assistant auto configurations
-  String createLight(String name, String id, String stateTopic, String icon);
+  String createLight(String name, String id, String stateTopic, String icon, bool supportsBrightness = false);
   String createSelect(String name, String id, String stateTopic, String icon, String options);
   String createSensor(String name, String id, String stateTopic, String icon, String unit, String deviceClass);
   String createSwitch(String name, String id, String stateTopic, String icon);

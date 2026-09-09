@@ -70,6 +70,17 @@ HaMqttConfigBuilder &DeviceConfigBuilder::addDefaults(String friendlyName, Strin
         .addStr("stat_t", "~/" + stateTopic);
 }
 
+String DeviceConfigBuilder::createDiagnostic(String friendlyName, String id, String stateTopic, String icon, String unit, String deviceClass)
+{
+    String config =
+        addDefaults(friendlyName, id, stateTopic, icon, unit, deviceClass)
+            .addStr("ent_cat", "diagnostic")
+            .generatePayload();
+
+    sendConfig("sensor", id, config);
+    return config;
+}
+
 String DeviceConfigBuilder::createLight(String friendlyName, String id, String stateTopic, String icon, bool supportsBrightness)
 {
     addDefaults(friendlyName, id, stateTopic, icon, "", "")

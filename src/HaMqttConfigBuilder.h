@@ -94,10 +94,11 @@ public:
       String fwModel);
 
   // Create different types of home assistant auto configurations
-  String createLight(String name, String id, String stateTopic, String icon, bool supportsBrightness = false);
-  String createSelect(String name, String id, String stateTopic, String icon, String options);
-  String createSensor(String name, String id, String stateTopic, String icon, String unit, String deviceClass);
-  String createSwitch(String name, String id, String stateTopic, String icon);
+  String createDiagnostic(String friendlyName, String id, String stateTopic, String icon, String unit, String deviceClass);
+  String createLight(String friendlyName, String id, String stateTopic, String icon, bool supportsBrightness = false);
+  String createSelect(String friendlyName, String id, String stateTopic, String icon, String options);
+  String createSensor(String friendlyName, String id, String stateTopic, String icon, String unit, String deviceClass);
+  String createSwitch(String friendlyName, String id, String stateTopic, String icon);
 
   DeviceConfigBuilder &setDeviceTopic(String value)
   {

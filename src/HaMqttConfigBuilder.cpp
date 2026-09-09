@@ -116,6 +116,7 @@ String DeviceConfigBuilder::createSensor(String friendlyName, String id, String 
 {
     String config =
         addDefaults(friendlyName, id, stateTopic, icon, unit, deviceClass)
+            .addStr("stat_cla", "measurement")
             .generatePayload();
 
     sendConfig("sensor", id, config);
